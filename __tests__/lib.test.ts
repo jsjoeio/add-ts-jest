@@ -22,8 +22,8 @@ describe("readPackageJson", () => {
     await fs.rm(tmpDirPath, { recursive: true, force: true });
   });
 
-  it("should return the packageJson as an object", () => {
-    const packageJson = readPackageJson(pathToPackageJson);
+  it("should return the packageJson as an object", async () => {
+    const packageJson = await readPackageJson(pathToPackageJson);
     expect(packageJson.name).toBe("test-package-json");
   });
 });

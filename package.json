@@ -17,5 +17,10 @@
   "scripts": {
     "build": "tsc",
     "test": "jest"
+  },
+  "dependencies": {
+    "json-schema-type": "^0.0.18",
+    "json-schema-typed": "^7.0.3",
+    "package-json-type": "^1.0.3"
   }
 }

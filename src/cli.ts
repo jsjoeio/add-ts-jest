@@ -1,2 +1,6 @@
 #! /usr/bin/env node
-console.log("unicorns♥");
+import { main } from "./lib";
+
+(async () => {
+  await main(process.cwd());
+})();

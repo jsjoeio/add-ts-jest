@@ -105,3 +105,6 @@ dist
 
 # Ignore build output
 bin
+
+# Ignore test directory
+test

@@ -110,7 +110,7 @@ export async function main(currentDir = process.cwd()): Promise<void> {
     await installDependencies(currentDir, missingDependencies);
   }
 
-  console.log("🚧 Createing jest.config.js ...");
+  console.log("🚧 creating jest.config.js ...");
   await createJestConfig(currentDir);
   console.log("🚧 Adding test script to package.json... ");
   await addTestScript(pathToPackageJson);
@@ -131,7 +131,11 @@ export async function addTestScript(pathToPackageJson: string) {
     scripts.test = "jest";
 
     try {
-      await fs.writeFile(pathToPackageJson, JSON.stringify(packageJson));
+      await fs.writeFile(
+        pathToPackageJson,
+        JSON.stringify(packageJson, null, 4)
+      );
+      return;
     } catch (error) {
       console.error("something went wrong writing the package.json");
     }

@@ -1,10 +1,6 @@
 # add-ts-jest
 npx add-ts-jest
 
-## TODOs
-- [ ] add test support
-- [ ] get basic console log
-
 
 ## Resources
 - https://dev.to/9zemian5/basic-npx-command-line-tool-45k4

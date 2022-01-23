@@ -69,7 +69,7 @@ export function checkForDependencies(
 }
 
 // Source: https://futurestud.io/tutorials/node-js-check-if-a-file-exists
-async function fileExists(path: string) {
+export async function fileExists(path: string) {
   try {
     await fs.access(path);
     return true;
@@ -98,7 +98,7 @@ export async function installDependencies(
   }
 }
 
-export async function main(currentDir: string): Promise<void> {
+export async function main(currentDir = process.cwd()): Promise<void> {
   const pathToPackageJson = path.join(currentDir, "package.json");
   const packageJson = await readPackageJson(pathToPackageJson);
 
@@ -109,4 +109,12 @@ export async function main(currentDir: string): Promise<void> {
   if (!hasDependencies) {
     await installDependencies(currentDir, missingDependencies);
   }
+
+  await createJestConfig(currentDir);
+}
+
+export async function createJestConfig(currentDir: string) {
+  await execPromise(`npx ts-jest config:init`, {
+    cwd: currentDir,
+  });
 }

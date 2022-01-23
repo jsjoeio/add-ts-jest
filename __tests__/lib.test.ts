@@ -3,6 +3,8 @@ import os from "os";
 import { promises as fs } from "fs";
 import {
   main,
+  fileExists,
+  createJestConfig,
   TS_JEST_REQUIRED_DEPENDENCIES,
   readPackageJson,
   installDependencies,
@@ -193,5 +195,24 @@ describe("main", () => {
         ).toBe(true);
       });
     });
+  });
+});
+
+describe("createJestConfig", () => {
+  let testPrefix = "createJestConfig";
+  let pathToJestConfig = "";
+  let tmpDirPath = path.join(os.tmpdir(), testPrefix);
+
+  beforeEach(async () => {
+    await fs.mkdir(tmpDirPath);
+    pathToJestConfig = `${tmpDirPath}/jest.config.js`;
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDirPath, { recursive: true, force: true });
+  });
+  it("should create a basic jest.config.js", async () => {
+    await createJestConfig(tmpDirPath);
+    expect(await fileExists(pathToJestConfig)).toBe(true);
   });
 });

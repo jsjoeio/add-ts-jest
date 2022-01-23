@@ -1,7 +1,7 @@
 {
   "name": "add-ts-jest",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "bin/cli.js",
   "repository": "git@github.com:jsjoeio/add-ts-jest.git",
   "author": "Joe Previte <jjprevite@gmail.com>",
   "license": "MIT",

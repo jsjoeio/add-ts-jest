@@ -1,7 +1,11 @@
 import path from "path";
 import os from "os";
 import { promises as fs } from "fs";
-import { readPackageJson, checkForDependencies } from "../src/lib";
+import {
+  readPackageJson,
+  installDependencies,
+  checkForDependencies,
+} from "../src/lib";
 
 describe("readPackageJson", () => {
   let testPrefix = "readPackageJson";
@@ -118,6 +122,41 @@ describe("checkForDependencies", () => {
       const actual = checkForDependencies(dependencies);
       expect(actual.hasDependencies).toBe(true);
       expect(actual.missingDependencies).toHaveLength(0);
+    });
+  });
+});
+
+describe("installDependencies", () => {
+  let testPrefix = "installDependencies";
+  let pathToPackageJson = "";
+  let tmpDirPath = path.join(os.tmpdir(), testPrefix);
+
+  const packageJsonData = {
+    devDependencies: {
+      jest: "^27.4.7",
+    },
+  };
+
+  beforeEach(async () => {
+    await fs.mkdir(tmpDirPath);
+    pathToPackageJson = `${tmpDirPath}/package.json`;
+    await fs.writeFile(pathToPackageJson, JSON.stringify(packageJsonData));
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDirPath, { recursive: true, force: true });
+  });
+  it("should install the missing dependencies", async () => {
+    // call it
+    const missingDependencies = ["ts-jest", "typescript", "@types/jest"];
+    await installDependencies(tmpDirPath, missingDependencies);
+    // read the package.json again
+    const packageJson = await readPackageJson(pathToPackageJson);
+    // check that it has the expected dependencies
+    missingDependencies.forEach((dep) => {
+      expect(
+        Object.keys(packageJson?.devDependencies || {}).includes(dep)
+      ).toBe(true);
     });
   });
 });

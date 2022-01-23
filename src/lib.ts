@@ -1,4 +1,6 @@
+import * as path from "path";
 import { promises as fs } from "fs";
+import { execSync } from "child_process";
 import { IDependencyMap, IPackageJson } from "package-json-type";
 
 export async function readPackageJson(path: string): Promise<IPackageJson> {
@@ -59,4 +61,34 @@ export function checkForDependencies(
   }
 
   return dependencyDetails;
+}
+
+// Source: https://futurestud.io/tutorials/node-js-check-if-a-file-exists
+async function fileExists(path: string) {
+  try {
+    await fs.access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function installDependencies(
+  currentDir: string,
+  missingDependencies: string[]
+): Promise<void> {
+  const yarnLockPath = path.join(currentDir, "/yarn.lock");
+  const hasYarnLock = await fileExists(yarnLockPath);
+  const depsAsString = missingDependencies.join(" ");
+
+  // Check if they're using yarn
+  if (hasYarnLock) {
+    execSync(`yarn add --dev ${depsAsString}`, {
+      cwd: currentDir,
+    });
+  } else {
+    execSync(`npm add --save-dev ${depsAsString}`, {
+      cwd: currentDir,
+    });
+  }
 }

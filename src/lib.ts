@@ -97,6 +97,7 @@ export async function installDependencies(
 }
 
 export async function main(currentDir = process.cwd()): Promise<void> {
+  console.log("🔨 Running `npx add-ts-jest`");
   const pathToPackageJson = path.join(currentDir, "package.json");
   const packageJson = await readPackageJson(pathToPackageJson);
 
@@ -105,11 +106,15 @@ export async function main(currentDir = process.cwd()): Promise<void> {
   );
 
   if (!hasDependencies) {
+    console.log("🚧 Installing missing dependencies...");
     await installDependencies(currentDir, missingDependencies);
   }
 
+  console.log("🚧 Createing jest.config.js ...");
   await createJestConfig(currentDir);
+  console.log("🚧 Adding test script to package.json... ");
   await addTestScript(pathToPackageJson);
+  console.log("✅ Done!");
 }
 
 export async function createJestConfig(currentDir: string) {

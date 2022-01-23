@@ -2,6 +2,8 @@ import path from "path";
 import os from "os";
 import { promises as fs } from "fs";
 import {
+  main,
+  TS_JEST_REQUIRED_DEPENDENCIES,
   readPackageJson,
   installDependencies,
   checkForDependencies,
@@ -127,6 +129,7 @@ describe("checkForDependencies", () => {
 });
 
 describe("installDependencies", () => {
+  jest.setTimeout(25000);
   let testPrefix = "installDependencies";
   let pathToPackageJson = "";
   let tmpDirPath = path.join(os.tmpdir(), testPrefix);
@@ -147,7 +150,6 @@ describe("installDependencies", () => {
     await fs.rm(tmpDirPath, { recursive: true, force: true });
   });
   it("should install the missing dependencies", async () => {
-    // call it
     const missingDependencies = ["ts-jest", "typescript", "@types/jest"];
     await installDependencies(tmpDirPath, missingDependencies);
     // read the package.json again
@@ -157,6 +159,39 @@ describe("installDependencies", () => {
       expect(
         Object.keys(packageJson?.devDependencies || {}).includes(dep)
       ).toBe(true);
+    });
+  });
+});
+
+describe("main", () => {
+  describe("in a fresh project", () => {
+    jest.setTimeout(100000);
+    let testPrefix = "freshProject";
+    let pathToPackageJson = "";
+    let tmpDirPath = path.join(os.tmpdir(), testPrefix);
+
+    const packageJsonData = {
+      devDependencies: {},
+    };
+
+    beforeEach(async () => {
+      await fs.mkdir(tmpDirPath);
+      pathToPackageJson = `${tmpDirPath}/package.json`;
+      await fs.writeFile(pathToPackageJson, JSON.stringify(packageJsonData));
+    });
+
+    afterEach(async () => {
+      await fs.rm(tmpDirPath, { recursive: true, force: true });
+    });
+    it("should install dependencies", async () => {
+      await main(tmpDirPath);
+      const packageJson = await readPackageJson(pathToPackageJson);
+      // check that it has the expected dependencies
+      TS_JEST_REQUIRED_DEPENDENCIES.forEach((dep) => {
+        expect(
+          Object.keys(packageJson?.devDependencies || {}).includes(dep)
+        ).toBe(true);
+      });
     });
   });
 });

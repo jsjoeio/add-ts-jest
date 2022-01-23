@@ -1,7 +1,12 @@
 import * as path from "path";
 import { promises as fs } from "fs";
-import { execSync } from "child_process";
+import { exec } from "child_process";
 import { IDependencyMap, IPackageJson } from "package-json-type";
+import util from "util";
+
+// https://stackoverflow.com/a/70742322/3015595
+// promisify exec
+const execPromise = util.promisify(exec);
 
 export async function readPackageJson(path: string): Promise<IPackageJson> {
   try {
@@ -24,7 +29,7 @@ interface DependencyDetails {
   missingDependencies: string[];
 }
 
-const TS_JEST_REQUIRED_DEPENDENCIES = [
+export const TS_JEST_REQUIRED_DEPENDENCIES = [
   "typescript",
   "jest",
   "ts-jest",
@@ -39,7 +44,7 @@ export function checkForDependencies(
     hasDependencies: false,
   };
 
-  if (dependencies) {
+  if (dependencies && Object.keys(dependencies).length > 0) {
     const updatedMissingDependencies: string[] = [];
     const dependencyKeys = Object.keys(dependencies);
     // Source:
@@ -77,18 +82,31 @@ export async function installDependencies(
   currentDir: string,
   missingDependencies: string[]
 ): Promise<void> {
-  const yarnLockPath = path.join(currentDir, "/yarn.lock");
-  const hasYarnLock = await fileExists(yarnLockPath);
+  const packageLockPath = path.join(currentDir, "package-lock.json");
+  const hasPackageLock = await fileExists(packageLockPath);
   const depsAsString = missingDependencies.join(" ");
 
-  // Check if they're using yarn
-  if (hasYarnLock) {
-    execSync(`yarn add --dev ${depsAsString}`, {
+  // Check if they're using npm
+  if (hasPackageLock) {
+    await execPromise(`npm install --save-dev ${depsAsString}`, {
       cwd: currentDir,
     });
   } else {
-    execSync(`npm add --save-dev ${depsAsString}`, {
+    await execPromise(`yarn add --dev ${depsAsString}`, {
       cwd: currentDir,
     });
+  }
+}
+
+export async function main(currentDir: string): Promise<void> {
+  const pathToPackageJson = path.join(currentDir, "package.json");
+  const packageJson = await readPackageJson(pathToPackageJson);
+
+  const { hasDependencies, missingDependencies } = checkForDependencies(
+    packageJson.devDependencies
+  );
+
+  if (!hasDependencies) {
+    await installDependencies(currentDir, missingDependencies);
   }
 }

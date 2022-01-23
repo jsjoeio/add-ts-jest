@@ -3,6 +3,7 @@ import os from "os";
 import { promises as fs } from "fs";
 import {
   main,
+  addTestScript,
   fileExists,
   createJestConfig,
   TS_JEST_REQUIRED_DEPENDENCIES,
@@ -214,5 +215,33 @@ describe("createJestConfig", () => {
   it("should create a basic jest.config.js", async () => {
     await createJestConfig(tmpDirPath);
     expect(await fileExists(pathToJestConfig)).toBe(true);
+  });
+});
+
+describe("addTestScript", () => {
+  let testPrefix = "addTestScript";
+  let pathToPackageJson = "";
+  let tmpDirPath = path.join(os.tmpdir(), testPrefix);
+
+  const packageJsonData = {
+    scripts: {
+      build: "tsc",
+    },
+  };
+
+  beforeEach(async () => {
+    await fs.mkdir(tmpDirPath);
+    pathToPackageJson = `${tmpDirPath}/package.json`;
+    await fs.writeFile(pathToPackageJson, JSON.stringify(packageJsonData));
+  });
+
+  afterEach(async () => {
+    await fs.rm(tmpDirPath, { recursive: true, force: true });
+  });
+  it("should add a test script to the package.json", async () => {
+    await addTestScript(pathToPackageJson);
+    const packageJson = await readPackageJson(pathToPackageJson);
+
+    expect(packageJson?.scripts?.test).toBe("jest");
   });
 });

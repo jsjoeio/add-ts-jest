@@ -13,8 +13,6 @@ export async function readPackageJson(path: string): Promise<IPackageJson> {
     const data = await fs.readFile(path, "utf-8");
     const dataAsObj = JSON.parse(data);
 
-    // TODO@jsjoeio implement by reading packageJson from path
-    // https://attacomsian.com/blog/nodejs-read-write-json-files
     return dataAsObj;
   } catch (error) {
     console.error("something went wrong reading the package json");
@@ -111,10 +109,30 @@ export async function main(currentDir = process.cwd()): Promise<void> {
   }
 
   await createJestConfig(currentDir);
+  await addTestScript(pathToPackageJson);
 }
 
 export async function createJestConfig(currentDir: string) {
   await execPromise(`npx ts-jest config:init`, {
     cwd: currentDir,
   });
+}
+
+export async function addTestScript(pathToPackageJson: string) {
+  const packageJson = await readPackageJson(pathToPackageJson);
+  const scripts = packageJson.scripts;
+
+  if (typeof scripts !== "undefined" && Object.keys(scripts).length > 0) {
+    scripts.test = "jest";
+
+    try {
+      await fs.writeFile(pathToPackageJson, JSON.stringify(packageJson));
+    } catch (error) {
+      console.error("something went wrong writing the package.json");
+    }
+  }
+
+  console.warn(
+    `Couldn't add "test": "jest" to your package.json. Please add yourself.`
+  );
 }

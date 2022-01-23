@@ -15,7 +15,7 @@ export async function readPackageJson(path: string): Promise<IPackageJson> {
 
     return dataAsObj;
   } catch (error) {
-    console.error("something went wrong reading the package json");
+    console.error("Something went wrong reading the package json");
   }
   return {};
 }
@@ -110,9 +110,9 @@ export async function main(currentDir = process.cwd()): Promise<void> {
     await installDependencies(currentDir, missingDependencies);
   }
 
-  console.log("🚧 creating jest.config.js ...");
+  console.log("🚧 Creating jest.config.js...");
   await createJestConfig(currentDir);
-  console.log("🚧 Adding test script to package.json... ");
+  console.log("🚧 Adding test script to package.json...");
   await addTestScript(pathToPackageJson);
   console.log("✅ Done!");
 }
@@ -137,7 +137,7 @@ export async function addTestScript(pathToPackageJson: string) {
       );
       return;
     } catch (error) {
-      console.error("something went wrong writing the package.json");
+      console.error("Something went wrong writing the package.json");
     }
   }
 

@@ -56,7 +56,39 @@ describe("checkForDependencies", () => {
       expect(actual.missingDependencies).toHaveLength(4);
     });
   });
-  describe("with dependencies", () => {
+  describe("with some dependencies", () => {
+    let testPrefix = "checkForDependencies";
+    let pathToPackageJson = "";
+    let tmpDirPath = path.join(os.tmpdir(), testPrefix);
+
+    const packageJsonData = {
+      devDependencies: {
+        "@types/jest": "^27.4.0",
+        "ts-jest": "^27.1.3",
+        typescript: "^4.5.5",
+      },
+    };
+
+    beforeEach(async () => {
+      await fs.mkdir(tmpDirPath);
+      pathToPackageJson = `${tmpDirPath}/package.json`;
+      await fs.writeFile(pathToPackageJson, JSON.stringify(packageJsonData));
+    });
+
+    afterEach(async () => {
+      await fs.rm(tmpDirPath, { recursive: true, force: true });
+    });
+    it("should return object with dependency details", async () => {
+      const packageJson = await readPackageJson(pathToPackageJson);
+      const dependencies = packageJson.devDependencies;
+
+      const actual = checkForDependencies(dependencies);
+      expect(actual.hasDependencies).toBe(false);
+      expect(actual.missingDependencies).toHaveLength(1);
+      expect(actual.missingDependencies.includes("jest")).toBe(true);
+    });
+  });
+  describe("with all dependencies", () => {
     let testPrefix = "checkForDependencies";
     let pathToPackageJson = "";
     let tmpDirPath = path.join(os.tmpdir(), testPrefix);
